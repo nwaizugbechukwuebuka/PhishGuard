@@ -8,6 +8,10 @@ on:
   release:
     types: [ published ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -36,6 +40,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 black isort mypy bandit safety
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
       - name: Code formatting check (Black)
         run: black --check --diff src/ tests/
@@ -56,7 +61,7 @@ jobs:
         run: safety check --json --output safety-report.json || true
 
       - name: Upload security reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-reports
@@ -108,6 +113,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
           pip install pytest pytest-cov pytest-asyncio pytest-mock
 
       - name: Set up test environment
@@ -120,9 +126,12 @@ jobs:
       - name: Run database migrations
         run: |
           export PYTHONPATH="${PYTHONPATH}:${PWD}/src"
-          python -m alembic upgrade head
+          cd src && python -m alembic upgrade head
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/phishguard_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci
+          ENVIRONMENT: testing
 
       - name: Run backend tests
         run: |
@@ -133,14 +142,18 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        if: env.CODECOV_TOKEN
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           flags: backend
           name: backend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: backend-test-results
@@ -182,11 +195,15 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload frontend coverage
-        uses: codecov/codecov-action@v3
+        if: env.CODECOV_TOKEN
+        uses: codecov/codecov-action@v4
         with:
           file: ./src/frontend/coverage/lcov.info
           flags: frontend
           name: frontend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # AI Model Testing
   ai-model-tests:
@@ -203,6 +220,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Install ML dependencies
         run: |
@@ -213,7 +233,7 @@ jobs:
       - name: Test AI model training
         run: |
           export PYTHONPATH="${PYTHONPATH}:${PWD}/src"
-          python src/ai_engine/model_trainer.py
+          python src/ai_engine/train_model.py
 
       - name: Validate model artifacts
         run: |
@@ -237,7 +257,7 @@ jobs:
           "
 
       - name: Upload model artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ai-models
           path: |
@@ -284,6 +304,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -299,10 +322,20 @@ jobs:
           cd src/frontend && npm ci
 
       - name: Download AI models
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ai-models
           path: ./
+
+      - name: Run database migrations
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:${PWD}/src"
+          cd src && python -m alembic upgrade head
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/phishguard_integration
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: integration-test-secret-key
+          ENVIRONMENT: testing
 
       - name: Build frontend
         working-directory: src/frontend
@@ -312,10 +345,23 @@ jobs:
         run: |
           export PYTHONPATH="${PYTHONPATH}:${PWD}/src"
           uvicorn src.api.main:app --host 0.0.0.0 --port 8000 &
-          sleep 10
+          
+          # Wait for server to start with timeout
+          timeout=30
+          while [ $timeout -gt 0 ] && ! curl -f http://localhost:8000/health 2>/dev/null; do
+            sleep 1
+            timeout=$((timeout - 1))
+          done
+          
+          if [ $timeout -eq 0 ]; then
+            echo "Server failed to start within 30 seconds"
+            exit 1
+          fi
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/phishguard_integration
           REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: integration-test-secret-key
+          ENVIRONMENT: testing
 
       - name: Run integration tests
         run: |
@@ -362,7 +408,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Download AI models
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ai-models
           path: ./src/ai_engine/
@@ -381,7 +427,7 @@ jobs:
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
-          context: ./src/frontend
+          context: .
           file: ./deployment/frontend.Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:${{ github.sha }}
@@ -414,6 +460,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Run Snyk security scan
+        if: env.SNYK_TOKEN
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
@@ -426,7 +473,7 @@ jobs:
     name: Performance Tests
     runs-on: ubuntu-latest
     needs: integration-tests
-    if: github.ref == 'refs/heads/main'
+    if: github.ref_name == 'main'
 
     steps:
       - name: Checkout code
@@ -451,7 +498,7 @@ jobs:
           echo "Performance test results" > performance-report.txt
 
       - name: Upload performance report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: performance-report
           path: performance-report.txt
@@ -461,7 +508,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [integration-tests, security-scan]
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    if: github.ref_name == 'develop' && github.event_name == 'push'
     environment:
       name: staging
       url: https://phishguard-staging.example.com
@@ -471,7 +518,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: 'v1.28.0'
 
@@ -485,33 +532,53 @@ jobs:
           # Update image tags in Kubernetes manifests
           sed -i "s|IMAGE_TAG|${{ github.sha }}|g" deployment/k8s/*.yaml
           
-          # Apply Kubernetes manifests
-          kubectl apply -f deployment/k8s/configmap.yaml
-          kubectl apply -f deployment/k8s/deployment.yaml
+          # Apply Kubernetes manifests with retry
+          for i in {1..3}; do
+            kubectl apply -f deployment/k8s/configmap.yaml && break
+            echo "Retry $i for configmap failed"
+            sleep 5
+          done
+          
+          for i in {1..3}; do
+            kubectl apply -f deployment/k8s/deployment.yaml && break
+            echo "Retry $i for deployment failed"
+            sleep 5
+          done
+          
           kubectl apply -f deployment/k8s/service.yaml
           kubectl apply -f deployment/k8s/ingress.yaml
           
-          # Wait for deployment to complete
-          kubectl rollout status deployment/phishguard-backend -n phishguard-staging
-          kubectl rollout status deployment/phishguard-frontend -n phishguard-staging
+          # Wait for deployment to complete with timeout
+          kubectl rollout status deployment/phishguard-backend -n phishguard-staging --timeout=600s
+          kubectl rollout status deployment/phishguard-frontend -n phishguard-staging --timeout=600s
 
       - name: Run smoke tests
         run: |
-          # Wait for services to be ready
-          sleep 30
+          # Wait for services to be ready with retry
+          for i in {1..10}; do
+            if curl -f https://phishguard-staging.example.com/health 2>/dev/null; then
+              echo "Health check passed"
+              break
+            fi
+            echo "Health check attempt $i failed, retrying in 30s..."
+            sleep 30
+            if [ $i -eq 10 ]; then
+              echo "Health checks failed after 10 attempts"
+              exit 1
+            fi
+          done
           
-          # Basic health checks
-          curl -f https://phishguard-staging.example.com/health || exit 1
+          # Additional API health checks
           curl -f https://phishguard-staging.example.com/api/v1/health || exit 1
 
       - name: Notify deployment status
+        if: always() && env.SLACK_WEBHOOK
         uses: 8398a7/action-slack@v3
-        if: always()
         with:
           status: ${{ job.status }}
           channel: '#deployments'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-          message: 'PhishGuard staging deployment completed'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   # Deployment to Production
   deploy-production:
@@ -528,7 +595,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: 'v1.28.0'
 
@@ -564,21 +631,14 @@ jobs:
           # Test critical endpoints
           curl -f https://phishguard.example.com/api/v1/threats/status || exit 1
 
-      - name: Update deployment status
-        uses: chrnorm/deployment-status@v2
-        with:
-          token: ${{ github.token }}
-          state: 'success'
-          deployment-id: ${{ steps.deployment.outputs.deployment-id }}
-
       - name: Notify production deployment
+        if: always() && env.SLACK_WEBHOOK
         uses: 8398a7/action-slack@v3
-        if: always()
         with:
           status: ${{ job.status }}
           channel: '#production'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-          message: 'PhishGuard production deployment completed successfully! 🚀'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   # Cleanup
   cleanup:
@@ -601,7 +661,7 @@ jobs:
           echo "- **Timestamp:** $(date -u)" >> deployment-summary.md
           
       - name: Upload deployment summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deployment-summary
           path: deployment-summary.md

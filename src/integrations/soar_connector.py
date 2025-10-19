@@ -3,12 +3,12 @@ SOAR (Security Orchestration, Automation and Response) Connector for PhishGuard
 Integrates with SOAR platforms for automated incident response and orchestration
 """
 
-import os
-import json
 import asyncio
-from typing import Dict, List, Optional, Any, Union
+import json
+import os
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 import aiohttp
 
@@ -18,28 +18,35 @@ from src.api.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class SOARPlatform(Enum):
     """Supported SOAR platforms"""
+
     PHANTOM = "phantom"
     DEMISTO = "demisto"
     SIEMPLIFY = "siemplify"
     RESILIENT = "resilient"
     GENERIC = "generic"
 
+
 class IncidentSeverity(Enum):
     """Incident severity levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class SOARConnectorError(Exception):
     """Custom exception for SOAR connector errors"""
+
     pass
+
 
 class SOARConnector:
     """SOAR platform integration for automated incident response"""
-    
+
     def __init__(
         self,
         platform: SOARPlatform = SOARPlatform.GENERIC,
@@ -47,11 +54,11 @@ class SOARConnector:
         api_key: str = None,
         username: str = None,
         password: str = None,
-        verify_ssl: bool = True
+        verify_ssl: bool = True,
     ):
         """
         Initialize SOAR connector
-        
+
         Args:
             platform: SOAR platform type
             base_url: SOAR platform base URL
@@ -61,31 +68,31 @@ class SOARConnector:
             verify_ssl: Whether to verify SSL certificates
         """
         self.platform = platform
-        self.base_url = base_url or os.getenv('SOAR_BASE_URL')
-        self.api_key = api_key or os.getenv('SOAR_API_KEY')
-        self.username = username or os.getenv('SOAR_USERNAME')
-        self.password = password or os.getenv('SOAR_PASSWORD')
+        self.base_url = base_url or os.getenv("SOAR_BASE_URL")
+        self.api_key = api_key or os.getenv("SOAR_API_KEY")
+        self.username = username or os.getenv("SOAR_USERNAME")
+        self.password = password or os.getenv("SOAR_PASSWORD")
         self.verify_ssl = verify_ssl
-        
+
         # Platform-specific settings
-        self.tenant_id = os.getenv('SOAR_TENANT_ID')
-        self.organization = os.getenv('ORGANIZATION_NAME', 'PhishGuard')
-        
+        self.tenant_id = os.getenv("SOAR_TENANT_ID")
+        self.organization = os.getenv("ORGANIZATION_NAME", "PhishGuard")
+
         if not self.base_url:
             logger.warning("SOAR base URL not configured")
-    
+
     def _get_auth_headers(self) -> Dict[str, str]:
         """
         Get authentication headers based on platform
-        
+
         Returns:
             Authentication headers
         """
         headers = {
             "Content-Type": "application/json",
-            "User-Agent": "PhishGuard-SOAR-Connector/1.0"
+            "User-Agent": "PhishGuard-SOAR-Connector/1.0",
         }
-        
+
         if self.api_key:
             if self.platform == SOARPlatform.PHANTOM:
                 headers["ph-auth-token"] = self.api_key
@@ -95,100 +102,116 @@ class SOARConnector:
                 headers["AppKey"] = self.api_key
             else:
                 headers["Authorization"] = f"Bearer {self.api_key}"
-        
+
         return headers
-    
+
     async def create_incident(
         self,
         email: Email,
         threat_details: Dict[str, Any],
         severity: IncidentSeverity = IncidentSeverity.MEDIUM,
-        assignee: str = None
+        assignee: str = None,
     ) -> Optional[str]:
         """
         Create incident in SOAR platform
-        
+
         Args:
             email: Email object that triggered the incident
             threat_details: Threat analysis details
             severity: Incident severity
             assignee: User to assign the incident to
-            
+
         Returns:
             Incident ID if created successfully
         """
         if not self.base_url:
             logger.warning("SOAR base URL not configured, skipping incident creation")
             return None
-        
+
         try:
             # Prepare incident data based on platform
             if self.platform == SOARPlatform.PHANTOM:
-                incident_data = await self._create_phantom_incident(email, threat_details, severity, assignee)
+                incident_data = await self._create_phantom_incident(
+                    email, threat_details, severity, assignee
+                )
                 endpoint = "/rest/container"
             elif self.platform == SOARPlatform.DEMISTO:
-                incident_data = await self._create_demisto_incident(email, threat_details, severity, assignee)
+                incident_data = await self._create_demisto_incident(
+                    email, threat_details, severity, assignee
+                )
                 endpoint = "/incident"
             elif self.platform == SOARPlatform.SIEMPLIFY:
-                incident_data = await self._create_siemplify_incident(email, threat_details, severity, assignee)
+                incident_data = await self._create_siemplify_incident(
+                    email, threat_details, severity, assignee
+                )
                 endpoint = "/external/v1/cases"
             elif self.platform == SOARPlatform.RESILIENT:
-                incident_data = await self._create_resilient_incident(email, threat_details, severity, assignee)
+                incident_data = await self._create_resilient_incident(
+                    email, threat_details, severity, assignee
+                )
                 endpoint = "/incidents"
             else:
                 # Generic format
-                incident_data = await self._create_generic_incident(email, threat_details, severity, assignee)
+                incident_data = await self._create_generic_incident(
+                    email, threat_details, severity, assignee
+                )
                 endpoint = "/incidents"
-            
+
             # Send request to SOAR platform
             headers = self._get_auth_headers()
             connector = aiohttp.TCPConnector(verify_ssl=self.verify_ssl)
-            
+
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(
-                    f"{self.base_url}{endpoint}",
-                    json=incident_data,
-                    headers=headers
+                    f"{self.base_url}{endpoint}", json=incident_data, headers=headers
                 ) as response:
                     if response.status in [200, 201]:
                         result = await response.json()
                         incident_id = self._extract_incident_id(result)
-                        
+
                         if incident_id:
-                            logger.info(f"SOAR incident created: {incident_id} for email {email.id}")
+                            logger.info(
+                                f"SOAR incident created: {incident_id} for email {email.id}"
+                            )
                             # Create artifacts/evidence for the incident
-                            await self._create_incident_artifacts(incident_id, email, threat_details)
+                            await self._create_incident_artifacts(
+                                incident_id, email, threat_details
+                            )
                             return incident_id
                         else:
-                            logger.error("Could not extract incident ID from SOAR response")
+                            logger.error(
+                                "Could not extract incident ID from SOAR response"
+                            )
                             return None
                     else:
                         error_text = await response.text()
-                        logger.error(f"SOAR incident creation failed: {response.status} - {error_text}")
+                        logger.error(
+                            f"SOAR incident creation failed: {response.status} - {error_text}"
+                        )
                         return None
-                        
+
         except aiohttp.ClientError as e:
             logger.error(f"SOAR client error: {e}")
             return None
         except Exception as e:
             logger.error(f"Unexpected error creating SOAR incident: {e}")
             return None
-    
+
     async def _create_phantom_incident(
         self,
         email: Email,
         threat_details: Dict[str, Any],
         severity: IncidentSeverity,
-        assignee: str = None
+        assignee: str = None,
     ) -> Dict[str, Any]:
         """Create incident data for Phantom SOAR"""
         severity_map = {
             IncidentSeverity.LOW: "low",
-            IncidentSeverity.MEDIUM: "medium", 
+            IncidentSeverity.MEDIUM: "medium",
             IncidentSeverity.HIGH: "high",
-            IncidentSeverity.CRITICAL: "high"
+            IncidentSeverity.CRITICAL: "high",
         }
-        
+
         return {
             "name": f"Phishing Email Detected - {email.sender_email}",
             "description": f"Phishing email detected from {email.sender_email} to {email.recipient_email}",
@@ -206,25 +229,25 @@ class SOARConnector:
                 "threat_level": threat_details.get("threat_level", "low"),
                 "platform": email.source_platform,
                 "received_date": email.received_date.isoformat(),
-                "indicators": threat_details.get("indicators", [])
-            }
+                "indicators": threat_details.get("indicators", []),
+            },
         }
-    
+
     async def _create_demisto_incident(
         self,
         email: Email,
         threat_details: Dict[str, Any],
         severity: IncidentSeverity,
-        assignee: str = None
+        assignee: str = None,
     ) -> Dict[str, Any]:
         """Create incident data for Demisto SOAR"""
         severity_map = {
             IncidentSeverity.LOW: 1,
             IncidentSeverity.MEDIUM: 2,
             IncidentSeverity.HIGH: 3,
-            IncidentSeverity.CRITICAL: 4
+            IncidentSeverity.CRITICAL: 4,
         }
-        
+
         incident_data = {
             "name": f"Phishing Email - {email.sender_email}",
             "type": "Phishing",
@@ -235,37 +258,40 @@ class SOARConnector:
                 {"type": "Subject", "value": email.subject or "No Subject"},
                 {"type": "Recipient", "value": email.recipient_email},
                 {"type": "Platform", "value": email.source_platform},
-                {"type": "RiskScore", "value": str(threat_details.get("risk_score", 0.0))}
+                {
+                    "type": "RiskScore",
+                    "value": str(threat_details.get("risk_score", 0.0)),
+                },
             ],
             "customFields": {
                 "emailid": email.id,
                 "emailplatform": email.source_platform,
                 "threatlevel": threat_details.get("threat_level", "low"),
                 "phishguardrisk": threat_details.get("risk_score", 0.0),
-                "quarantined": email.is_quarantined
-            }
+                "quarantined": email.is_quarantined,
+            },
         }
-        
+
         if assignee:
             incident_data["owner"] = assignee
-        
+
         return incident_data
-    
+
     async def _create_siemplify_incident(
         self,
         email: Email,
         threat_details: Dict[str, Any],
         severity: IncidentSeverity,
-        assignee: str = None
+        assignee: str = None,
     ) -> Dict[str, Any]:
         """Create incident data for Siemplify SOAR"""
         severity_map = {
             IncidentSeverity.LOW: 40,
             IncidentSeverity.MEDIUM: 60,
             IncidentSeverity.HIGH: 80,
-            IncidentSeverity.CRITICAL: 100
+            IncidentSeverity.CRITICAL: 100,
         }
-        
+
         return {
             "name": f"Phishing Email Detection - {email.sender_email}",
             "description": f"Suspicious email detected from {email.sender_email} to {email.recipient_email}",
@@ -288,32 +314,32 @@ class SOARConnector:
                         "subject": email.subject,
                         "risk_score": threat_details.get("risk_score", 0.0),
                         "threat_level": threat_details.get("threat_level", "low"),
-                        "platform": email.source_platform
-                    }
+                        "platform": email.source_platform,
+                    },
                 }
-            ]
+            ],
         }
-    
+
     async def _create_resilient_incident(
         self,
         email: Email,
         threat_details: Dict[str, Any],
         severity: IncidentSeverity,
-        assignee: str = None
+        assignee: str = None,
     ) -> Dict[str, Any]:
         """Create incident data for IBM Resilient SOAR"""
         severity_map = {
             IncidentSeverity.LOW: "Low",
             IncidentSeverity.MEDIUM: "Medium",
             IncidentSeverity.HIGH: "High",
-            IncidentSeverity.CRITICAL: "High"
+            IncidentSeverity.CRITICAL: "High",
         }
-        
+
         return {
             "name": f"Phishing Email - {email.sender_email}",
             "description": {
                 "format": "text",
-                "content": f"Phishing email detected from {email.sender_email} to {email.recipient_email}. Risk Score: {threat_details.get('risk_score', 0.0):.2%}"
+                "content": f"Phishing email detected from {email.sender_email} to {email.recipient_email}. Risk Score: {threat_details.get('risk_score', 0.0):.2%}",
             },
             "discovered_date": int(email.received_date.timestamp() * 1000),
             "incident_type_ids": [1],  # Phishing incident type
@@ -325,16 +351,16 @@ class SOARConnector:
                 "email_platform": email.source_platform,
                 "phishguard_risk_score": threat_details.get("risk_score", 0.0),
                 "threat_level": threat_details.get("threat_level", "low"),
-                "quarantined": email.is_quarantined
-            }
+                "quarantined": email.is_quarantined,
+            },
         }
-    
+
     async def _create_generic_incident(
         self,
         email: Email,
         threat_details: Dict[str, Any],
         severity: IncidentSeverity,
-        assignee: str = None
+        assignee: str = None,
     ) -> Dict[str, Any]:
         """Create incident data for generic SOAR platform"""
         return {
@@ -356,13 +382,13 @@ class SOARConnector:
                     "platform": email.source_platform,
                     "platform_message_id": email.platform_message_id,
                     "has_attachments": email.has_attachments,
-                    "quarantined": email.is_quarantined
+                    "quarantined": email.is_quarantined,
                 },
                 "threat_analysis": threat_details,
-                "indicators": threat_details.get("indicators", [])
-            }
+                "indicators": threat_details.get("indicators", []),
+            },
         }
-    
+
     def _extract_incident_id(self, response_data: Dict[str, Any]) -> Optional[str]:
         """Extract incident ID from SOAR platform response"""
         if self.platform == SOARPlatform.PHANTOM:
@@ -375,72 +401,81 @@ class SOARConnector:
             return str(response_data.get("id"))
         else:
             return response_data.get("id") or response_data.get("incident_id")
-    
+
     async def _create_incident_artifacts(
-        self,
-        incident_id: str,
-        email: Email,
-        threat_details: Dict[str, Any]
+        self, incident_id: str, email: Email, threat_details: Dict[str, Any]
     ) -> bool:
         """
         Create artifacts/evidence for the incident
-        
+
         Args:
             incident_id: SOAR incident ID
             email: Email object
             threat_details: Threat analysis details
-            
+
         Returns:
             bool: True if artifacts created successfully
         """
         try:
             artifacts = []
-            
+
             # Email artifacts
-            artifacts.append({
-                "type": "email",
-                "value": email.sender_email,
-                "description": "Sender email address",
-                "tags": ["phishing", "sender"]
-            })
-            
-            artifacts.append({
-                "type": "email",
-                "value": email.recipient_email,
-                "description": "Recipient email address",
-                "tags": ["phishing", "recipient"]
-            })
-            
+            artifacts.append(
+                {
+                    "type": "email",
+                    "value": email.sender_email,
+                    "description": "Sender email address",
+                    "tags": ["phishing", "sender"],
+                }
+            )
+
+            artifacts.append(
+                {
+                    "type": "email",
+                    "value": email.recipient_email,
+                    "description": "Recipient email address",
+                    "tags": ["phishing", "recipient"],
+                }
+            )
+
             # URL artifacts from threat indicators
             indicators = threat_details.get("indicators", [])
             for indicator in indicators:
                 if "url" in indicator.lower() or "link" in indicator.lower():
-                    artifacts.append({
-                        "type": "url",
-                        "value": indicator,
-                        "description": "Suspicious URL found in email",
-                        "tags": ["phishing", "url", "suspicious"]
-                    })
+                    artifacts.append(
+                        {
+                            "type": "url",
+                            "value": indicator,
+                            "description": "Suspicious URL found in email",
+                            "tags": ["phishing", "url", "suspicious"],
+                        }
+                    )
                 elif "domain" in indicator.lower():
-                    artifacts.append({
-                        "type": "domain",
-                        "value": indicator,
-                        "description": "Suspicious domain found in email",
-                        "tags": ["phishing", "domain", "suspicious"]
-                    })
-            
+                    artifacts.append(
+                        {
+                            "type": "domain",
+                            "value": indicator,
+                            "description": "Suspicious domain found in email",
+                            "tags": ["phishing", "domain", "suspicious"],
+                        }
+                    )
+
             # Create artifacts in SOAR platform
             for artifact in artifacts:
                 await self._create_single_artifact(incident_id, artifact)
-            
-            logger.info(f"Created {len(artifacts)} artifacts for incident {incident_id}")
+
+            logger.info(
+                f"Created {len(artifacts)} artifacts for incident {incident_id}"
+            )
             return True
-            
+
         except Exception as e:
             logger.error(f"Error creating incident artifacts: {e}")
             return False
-    
-    async def _create_single_artifact(self, incident_id: str, artifact: Dict[str, Any]) -> bool:
+
+    async def _create_single_artifact(
+        self, incident_id: str, artifact: Dict[str, Any]
+    ) -> bool:
         """Create a single artifact in the SOAR platform"""
         try:
             if self.platform == SOARPlatform.PHANTOM:
@@ -450,7 +485,7 @@ class SOARConnector:
                     "name": artifact["type"],
                     "cef": {artifact["type"]: artifact["value"]},
                     "description": artifact["description"],
-                    "tags": artifact.get("tags", [])
+                    "tags": artifact.get("tags", []),
                 }
             elif self.platform == SOARPlatform.DEMISTO:
                 # Demisto uses evidence instead of artifacts
@@ -459,44 +494,38 @@ class SOARConnector:
                 # Generic artifact creation
                 endpoint = f"/incidents/{incident_id}/artifacts"
                 artifact_data = artifact
-            
+
             headers = self._get_auth_headers()
             connector = aiohttp.TCPConnector(verify_ssl=self.verify_ssl)
-            
+
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(
-                    f"{self.base_url}{endpoint}",
-                    json=artifact_data,
-                    headers=headers
+                    f"{self.base_url}{endpoint}", json=artifact_data, headers=headers
                 ) as response:
                     return response.status in [200, 201]
-                    
+
         except Exception as e:
             logger.error(f"Error creating artifact: {e}")
             return False
-    
+
     async def update_incident_status(
-        self,
-        incident_id: str,
-        status: str,
-        resolution: str = None,
-        notes: str = None
+        self, incident_id: str, status: str, resolution: str = None, notes: str = None
     ) -> bool:
         """
         Update incident status in SOAR platform
-        
+
         Args:
             incident_id: SOAR incident ID
             status: New status
             resolution: Resolution if closing
             notes: Additional notes
-            
+
         Returns:
             bool: True if updated successfully
         """
         if not self.base_url:
             return False
-        
+
         try:
             # Prepare update data based on platform
             if self.platform == SOARPlatform.PHANTOM:
@@ -508,49 +537,53 @@ class SOARConnector:
             else:
                 endpoint = f"/incidents/{incident_id}"
                 update_data = {"status": status}
-            
+
             if resolution:
                 update_data["resolution"] = resolution
-            
+
             if notes:
                 update_data["notes"] = notes
-            
+
             headers = self._get_auth_headers()
             connector = aiohttp.TCPConnector(verify_ssl=self.verify_ssl)
-            
+
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.patch(
-                    f"{self.base_url}{endpoint}",
-                    json=update_data,
-                    headers=headers
+                    f"{self.base_url}{endpoint}", json=update_data, headers=headers
                 ) as response:
                     if response.status == 200:
-                        logger.info(f"SOAR incident {incident_id} status updated to {status}")
+                        logger.info(
+                            f"SOAR incident {incident_id} status updated to {status}"
+                        )
                         return True
                     else:
                         error_text = await response.text()
-                        logger.error(f"SOAR incident update failed: {response.status} - {error_text}")
+                        logger.error(
+                            f"SOAR incident update failed: {response.status} - {error_text}"
+                        )
                         return False
-                        
+
         except Exception as e:
             logger.error(f"Error updating SOAR incident: {e}")
             return False
-    
-    async def add_incident_comment(self, incident_id: str, comment: str, author: str = None) -> bool:
+
+    async def add_incident_comment(
+        self, incident_id: str, comment: str, author: str = None
+    ) -> bool:
         """
         Add comment to SOAR incident
-        
+
         Args:
             incident_id: SOAR incident ID
             comment: Comment text
             author: Comment author
-            
+
         Returns:
             bool: True if comment added successfully
         """
         if not self.base_url:
             return False
-        
+
         try:
             # Platform-specific comment creation
             if self.platform == SOARPlatform.PHANTOM:
@@ -559,60 +592,60 @@ class SOARConnector:
                     "container_id": incident_id,
                     "title": "PhishGuard Update",
                     "content": comment,
-                    "author": author or "PhishGuard"
+                    "author": author or "PhishGuard",
                 }
             elif self.platform == SOARPlatform.DEMISTO:
                 endpoint = f"/incident/{incident_id}/entries"
-                comment_data = {
-                    "contents": comment,
-                    "type": 1  # Note type
-                }
+                comment_data = {"contents": comment, "type": 1}  # Note type
             else:
                 endpoint = f"/incidents/{incident_id}/comments"
-                comment_data = {
-                    "text": comment,
-                    "author": author or "PhishGuard"
-                }
-            
+                comment_data = {"text": comment, "author": author or "PhishGuard"}
+
             headers = self._get_auth_headers()
             connector = aiohttp.TCPConnector(verify_ssl=self.verify_ssl)
-            
+
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.post(
-                    f"{self.base_url}{endpoint}",
-                    json=comment_data,
-                    headers=headers
+                    f"{self.base_url}{endpoint}", json=comment_data, headers=headers
                 ) as response:
                     if response.status in [200, 201]:
                         logger.info(f"Comment added to SOAR incident {incident_id}")
                         return True
                     else:
                         error_text = await response.text()
-                        logger.error(f"SOAR comment creation failed: {response.status} - {error_text}")
+                        logger.error(
+                            f"SOAR comment creation failed: {response.status} - {error_text}"
+                        )
                         return False
-                        
+
         except Exception as e:
             logger.error(f"Error adding SOAR incident comment: {e}")
             return False
-    
+
     def is_configured(self) -> bool:
         """
         Check if SOAR integration is properly configured
-        
+
         Returns:
             bool: True if configured
         """
-        return bool(self.base_url and (self.api_key or (self.username and self.password)))
+        return bool(
+            self.base_url and (self.api_key or (self.username and self.password))
+        )
+
 
 # Utility functions for SOAR integration
-async def create_soar_connector(platform: SOARPlatform = SOARPlatform.GENERIC) -> SOARConnector:
+async def create_soar_connector(
+    platform: SOARPlatform = SOARPlatform.GENERIC,
+) -> SOARConnector:
     """Create SOAR connector for specified platform"""
     return SOARConnector(platform=platform)
+
 
 async def create_soar_incident(
     email: Email,
     threat_details: Dict[str, Any],
-    platform: SOARPlatform = SOARPlatform.GENERIC
+    platform: SOARPlatform = SOARPlatform.GENERIC,
 ) -> Optional[str]:
     """Convenience function to create SOAR incident"""
     connector = await create_soar_connector(platform)

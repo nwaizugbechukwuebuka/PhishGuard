@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -15,24 +16,24 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Toaster } from 'react-hot-toast';
 
 // Store and Context
-import { useAuthStore } from '@store/authStore';
-import { useThemeStore } from '@store/themeStore';
+import { useAuthStore } from './store/authStore';
+import { useThemeStore } from './store/themeStore';
 
 // Components
-import Navbar from '@components/Navbar';
-import LoadingSpinner from '@components/LoadingSpinner';
-import ErrorFallback from '@components/ErrorFallback';
+import Navbar from './components/Navbar';
+import LoadingSpinner from './components/LoadingSpinner';
+import ErrorFallback from './components/ErrorFallback';
 
 // Pages
-import Home from '@pages/Home';
-import Analytics from '@pages/Analytics';
-import Quarantine from '@pages/Quarantine';
-import Compliance from '@pages/Compliance';
-import Login from '@pages/Login';
-import Dashboard from '@components/Dashboard';
+import Home from './pages/Home';
+import Analytics from './pages/Analytics';
+import Quarantine from './pages/Quarantine';
+import Compliance from './pages/Compliance';
+import Login from './pages/Login';
+import Dashboard from './components/Dashboard';
 
 // Services
-import { initializeWebSocket } from '@services/websocket';
+import { initializeWebSocket } from './services/websocket';
 
 // Hooks
 import { useEffect } from 'react';
@@ -42,14 +43,16 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      retry: (failureCount, error: any) => {
+      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
+      retry: (failureCount, error) => {
         // Don't retry on 401 or 403 errors
         if (error?.response?.status === 401 || error?.response?.status === 403) {
           return false;
         }
         return failureCount < 3;
       },
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
     },
     mutations: {
       retry: 1,
@@ -58,7 +61,7 @@ const queryClient = new QueryClient({
 });
 
 // Create Material-UI theme
-const createAppTheme = (mode: 'light' | 'dark') => {
+const createAppTheme = (mode) => {
   return createTheme({
     palette: {
       mode,
@@ -152,7 +155,7 @@ const createAppTheme = (mode: 'light' | 'dark') => {
 };
 
 // Protected Route Component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
 
@@ -167,8 +170,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 // Layout Component
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
@@ -179,24 +186,32 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+Layout.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 // Main App Component
-const App: React.FC = () => {
+const App = () => {
   const themeMode = useThemeStore((state) => state.mode);
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const theme = React.useMemo(() => createAppTheme(themeMode), [themeMode]);
 
-  // Initialize authentication and WebSocket on app start
+  // Initialize authentication on app start
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []); // Empty dependency array since checkAuth should be stable
 
   // Initialize WebSocket connection when authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const cleanup = initializeWebSocket();
-      return cleanup;
+      try {
+        const cleanup = initializeWebSocket();
+        return cleanup;
+      } catch (error) {
+        console.error('Failed to initialize WebSocket:', error);
+      }
     }
   }, [isAuthenticated]);
 

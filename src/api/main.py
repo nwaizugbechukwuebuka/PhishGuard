@@ -11,22 +11,21 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any, Dict
 
+import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import start_http_server
-import uvicorn
 
-from .database import engine, metadata, create_tables
+from .database import create_tables, engine, metadata
 from .middleware.auth_middleware import AuthMiddleware
 from .middleware.rate_limit import RateLimitMiddleware
 from .middleware.request_logger import RequestLoggerMiddleware
 from .routes import auth, notify, quarantine, reports, simulation, users
 from .utils.config import settings
-from .utils.logger import setup_logging, logger
+from .utils.logger import logger, setup_logging
 from .utils.security import SecurityHeaders
-
 
 # Initialize logging
 setup_logging()
@@ -37,31 +36,34 @@ async def lifespan(app: FastAPI):
     """Application lifespan events for startup and shutdown."""
     # Startup
     logger.info("🚀 Starting PhishGuard Enterprise Security Platform...")
-    
+
     try:
         # Create database tables
         await create_tables()
         logger.info("✅ Database tables initialized")
-        
+
         # Start Prometheus metrics server
         if settings.METRICS_ENABLED:
             start_http_server(settings.PROMETHEUS_METRICS_PORT)
-            logger.info(f"📊 Prometheus metrics server started on port {settings.PROMETHEUS_METRICS_PORT}")
-        
+            logger.info(
+                f"📊 Prometheus metrics server started on port {settings.PROMETHEUS_METRICS_PORT}"
+            )
+
         # Warm up AI models
         from .ai_engine.inference import PhishingDetector
+
         detector = PhishingDetector()
         await detector.load_model()
         logger.info("🤖 AI models loaded successfully")
-        
+
         logger.info("🛡️ PhishGuard is ready for enterprise email security!")
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to start PhishGuard: {str(e)}")
         raise
-    
+
     yield
-    
+
     # Shutdown
     logger.info("🔄 Shutting down PhishGuard...")
     logger.info("👋 PhishGuard shutdown complete")
@@ -106,7 +108,11 @@ app = FastAPI(
 # Security Middleware
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"] if settings.DEBUG else ["localhost", "127.0.0.1", settings.ALLOWED_ORIGINS]
+    allowed_hosts=(
+        ["*"]
+        if settings.DEBUG
+        else ["localhost", "127.0.0.1", settings.ALLOWED_ORIGINS]
+    ),
 )
 
 app.add_middleware(
@@ -146,13 +152,17 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions with secure error responses."""
     logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
-    
+
     return JSONResponse(
         status_code=500,
         content={
             "error": {
                 "type": "internal_error",
-                "message": "An internal server error occurred" if not settings.DEBUG else str(exc),
+                "message": (
+                    "An internal server error occurred"
+                    if not settings.DEBUG
+                    else str(exc)
+                ),
                 "status_code": 500,
                 "path": str(request.url),
                 "timestamp": logger.get_timestamp(),
@@ -166,14 +176,14 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 async def health_check() -> Dict[str, Any]:
     """
     Comprehensive health check endpoint for monitoring and load balancers.
-    
+
     Returns system status, database connectivity, and service health metrics.
     """
     from .services.health_service import HealthService
-    
+
     health_service = HealthService()
     health_status = await health_service.get_system_health()
-    
+
     return {
         "status": "healthy" if health_status["overall_health"] else "unhealthy",
         "timestamp": logger.get_timestamp(),
@@ -189,14 +199,14 @@ async def liveness_probe() -> Dict[str, str]:
     return {"status": "alive", "timestamp": logger.get_timestamp()}
 
 
-@app.get("/health/ready", tags=["Health"], summary="Readiness Probe") 
+@app.get("/health/ready", tags=["Health"], summary="Readiness Probe")
 async def readiness_probe() -> Dict[str, Any]:
     """Kubernetes readiness probe endpoint."""
     from .services.health_service import HealthService
-    
+
     health_service = HealthService()
     is_ready = await health_service.check_readiness()
-    
+
     return {
         "status": "ready" if is_ready else "not_ready",
         "timestamp": logger.get_timestamp(),
@@ -257,7 +267,7 @@ async def root() -> Dict[str, Any]:
         "timestamp": logger.get_timestamp(),
         "features": [
             "AI-Powered Phishing Detection",
-            "Real-time Email Scanning", 
+            "Real-time Email Scanning",
             "Automated Quarantine Management",
             "Enterprise Integrations",
             "Compliance Reporting",
@@ -271,7 +281,7 @@ async def root() -> Dict[str, Any]:
 async def websocket_endpoint(websocket):
     """WebSocket endpoint for real-time notifications and updates."""
     from .services.notification_service import NotificationService
-    
+
     notification_service = NotificationService()
     await notification_service.handle_websocket(websocket)
 

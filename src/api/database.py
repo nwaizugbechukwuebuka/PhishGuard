@@ -17,7 +17,6 @@ from sqlalchemy.pool import NullPool, QueuePool
 from .utils.config import settings
 from .utils.logger import logger
 
-
 # Create async engine with optimized connection pooling
 engine = create_async_engine(
     settings.DATABASE_URL,
@@ -76,10 +75,10 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency function to get database session.
-    
+
     Yields:
         AsyncSession: Database session for dependency injection
-        
+
     Example:
         ```python
         @app.get("/users")
@@ -103,7 +102,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def create_tables():
     """
     Create all database tables asynchronously.
-    
+
     This function imports all models to ensure they are registered
     with the Base metadata before creating tables.
     """
@@ -114,19 +113,19 @@ async def create_tables():
             base,
             email,
             notification,
-            quarantine, 
+            quarantine,
             simulation,
             user,
         )
-        
+
         logger.info("📊 Creating database tables...")
-        
+
         async with engine.begin() as conn:
             # Create tables
             await conn.run_sync(Base.metadata.create_all)
-            
+
         logger.info("✅ Database tables created successfully")
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to create database tables: {str(e)}")
         raise
@@ -135,17 +134,17 @@ async def create_tables():
 async def drop_tables():
     """
     Drop all database tables asynchronously.
-    
+
     Warning: This will delete all data! Only use in development.
     """
     try:
         logger.warning("⚠️ Dropping all database tables...")
-        
+
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-            
+
         logger.info("🗑️ Database tables dropped successfully")
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to drop database tables: {str(e)}")
         raise
@@ -154,7 +153,7 @@ async def drop_tables():
 async def check_database_connection() -> bool:
     """
     Check if database connection is healthy.
-    
+
     Returns:
         bool: True if connection is healthy, False otherwise
     """
@@ -169,12 +168,12 @@ async def check_database_connection() -> bool:
 
 class DatabaseHealthCheck:
     """Database health monitoring utilities."""
-    
+
     @staticmethod
     async def get_connection_stats() -> dict:
         """
         Get database connection pool statistics.
-        
+
         Returns:
             dict: Connection pool statistics
         """
@@ -190,26 +189,26 @@ class DatabaseHealthCheck:
         except Exception as e:
             logger.error(f"Failed to get connection stats: {str(e)}")
             return {}
-    
+
     @staticmethod
     async def test_query_performance() -> dict:
         """
         Test database query performance.
-        
+
         Returns:
             dict: Performance metrics
         """
         import time
-        
+
         try:
             start_time = time.time()
-            
+
             async with AsyncSessionLocal() as session:
                 await session.execute("SELECT version()")
-                
+
             end_time = time.time()
             query_time = round((end_time - start_time) * 1000, 2)  # Convert to ms
-            
+
             return {
                 "query_time_ms": query_time,
                 "status": "healthy" if query_time < 100 else "slow",
@@ -228,14 +227,14 @@ async def init_database():
     """Initialize database connection and verify connectivity."""
     try:
         logger.info("🔄 Initializing database connection...")
-        
+
         # Test connection
         is_connected = await check_database_connection()
         if not is_connected:
             raise Exception("Failed to establish database connection")
-            
+
         logger.info("✅ Database connection established")
-        
+
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {str(e)}")
         raise
@@ -244,23 +243,23 @@ async def init_database():
 # Context manager for database transactions
 class DatabaseTransaction:
     """Context manager for database transactions with automatic rollback."""
-    
+
     def __init__(self):
         self.session = None
-    
+
     async def __aenter__(self) -> AsyncSession:
         self.session = AsyncSessionLocal()
         return self.session
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if exc_type is not None:
             await self.session.rollback()
             logger.error(f"Transaction rolled back due to error: {exc_val}")
         else:
             await self.session.commit()
-        
+
         await self.session.close()
-        
+
         # Return False to propagate any exception
         return False
 
@@ -268,16 +267,16 @@ class DatabaseTransaction:
 # Database utilities
 class DatabaseUtils:
     """Database utility functions for common operations."""
-    
+
     @staticmethod
     async def execute_raw_query(query: str, params: dict = None) -> list:
         """
         Execute raw SQL query safely.
-        
+
         Args:
             query: SQL query string
             params: Query parameters
-            
+
         Returns:
             list: Query results
         """
@@ -288,22 +287,28 @@ class DatabaseUtils:
         except Exception as e:
             logger.error(f"Raw query execution failed: {str(e)}")
             raise
-    
+
     @staticmethod
     async def get_table_stats() -> dict:
         """
         Get statistics for all tables.
-        
+
         Returns:
             dict: Table statistics
         """
         try:
             stats = {}
-            
+
             async with AsyncSessionLocal() as session:
                 # Get table row counts
-                tables = ['users', 'emails', 'quarantine_items', 'notifications', 'audit_logs']
-                
+                tables = [
+                    "users",
+                    "emails",
+                    "quarantine_items",
+                    "notifications",
+                    "audit_logs",
+                ]
+
                 for table in tables:
                     try:
                         result = await session.execute(f"SELECT COUNT(*) FROM {table}")
@@ -311,9 +316,9 @@ class DatabaseUtils:
                         stats[table] = {"row_count": count}
                     except Exception as table_error:
                         stats[table] = {"error": str(table_error)}
-            
+
             return stats
-            
+
         except Exception as e:
             logger.error(f"Failed to get table stats: {str(e)}")
             return {}
@@ -322,7 +327,7 @@ class DatabaseUtils:
 # Export commonly used objects
 __all__ = [
     "engine",
-    "sync_engine", 
+    "sync_engine",
     "AsyncSessionLocal",
     "SessionLocal",
     "Base",
