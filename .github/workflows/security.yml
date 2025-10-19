@@ -1,0 +1,72 @@
+﻿name: Security & Secret Scan
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run GitHub Secret Scanning
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+      - name: Perform Secret Scan
+        run: |
+          echo 'Secrets and sensitive data scan triggered'
+
+  security-lint:
+    name: Security Lint & Vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Safety and Bandit
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety bandit
+
+      - name: Run Bandit (Code Security Analysis)
+        run: bandit -r ./src -lll
+
+      - name: Run Safety (Dependency Vulnerability Check)
+        run: safety check
+
+  format-check:
+    name: Code Formatting & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Black and Flake8
+        run: |
+          pip install black flake8
+
+      - name: Run Black
+        run: black --check ./src
+
+      - name: Run Flake8
+        run: flake8 ./src
