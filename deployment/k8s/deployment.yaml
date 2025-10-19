@@ -1,0 +1,389 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phishguard-backend
+  namespace: phishguard
+  labels:
+    app: phishguard-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: phishguard-backend
+  template:
+    metadata:
+      labels:
+        app: phishguard-backend
+    spec:
+      containers:
+      - name: phishguard-backend
+        image: phishguard/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: DATABASE_PASSWORD
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: JWT_SECRET_KEY
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: ENCRYPTION_KEY
+        envFrom:
+        - configMapRef:
+            name: phishguard-config
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: quarantine-storage
+          mountPath: /app/quarantine_storage
+      volumes:
+      - name: quarantine-storage
+        persistentVolumeClaim:
+          claimName: quarantine-pvc
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phishguard-frontend
+  namespace: phishguard
+  labels:
+    app: phishguard-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: phishguard-frontend
+  template:
+    metadata:
+      labels:
+        app: phishguard-frontend
+    spec:
+      containers:
+      - name: phishguard-frontend
+        image: phishguard/frontend:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phishguard-celery-worker
+  namespace: phishguard
+  labels:
+    app: phishguard-celery-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: phishguard-celery-worker
+  template:
+    metadata:
+      labels:
+        app: phishguard-celery-worker
+    spec:
+      containers:
+      - name: celery-worker
+        image: phishguard/backend:latest
+        command: ["/app/deployment/docker-entrypoint.sh", "celery-worker"]
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: DATABASE_PASSWORD
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: JWT_SECRET_KEY
+        envFrom:
+        - configMapRef:
+            name: phishguard-config
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: quarantine-storage
+          mountPath: /app/quarantine_storage
+      volumes:
+      - name: quarantine-storage
+        persistentVolumeClaim:
+          claimName: quarantine-pvc
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phishguard-celery-beat
+  namespace: phishguard
+  labels:
+    app: phishguard-celery-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phishguard-celery-beat
+  template:
+    metadata:
+      labels:
+        app: phishguard-celery-beat
+    spec:
+      containers:
+      - name: celery-beat
+        image: phishguard/backend:latest
+        command: ["/app/deployment/docker-entrypoint.sh", "celery-beat"]
+        env:
+        - name: DATABASE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: DATABASE_PASSWORD
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: JWT_SECRET_KEY
+        envFrom:
+        - configMapRef:
+            name: phishguard-config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: phishguard
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "phishguard"
+        - name: POSTGRES_USER
+          value: "phishguard"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: phishguard-secrets
+              key: DATABASE_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: init-sql
+          mountPath: /docker-entrypoint-initdb.d
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - phishguard
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - phishguard
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+      - name: init-sql
+        configMap:
+          name: postgres-init-sql
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: phishguard
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        command:
+        - redis-server
+        - --appendonly
+        - "yes"
+        - --maxmemory
+        - 256mb
+        - --maxmemory-policy
+        - allkeys-lru
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: redis-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: phishguard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: phishguard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: quarantine-pvc
+  namespace: phishguard
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-sql
+  namespace: phishguard
+data:
+  init.sql: |
+    -- Database initialization script will be mounted here
+    -- This references the init_db.sql file content

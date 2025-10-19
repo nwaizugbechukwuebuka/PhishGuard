@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: phishguard-config
+  namespace: phishguard
+data:
+  # Database configuration
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "phishguard"
+  DATABASE_USER: "phishguard"
+  
+  # Redis configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  
+  # Application configuration
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  DEBUG: "false"
+  
+  # AI Engine configuration
+  AI_MODEL_PATH: "/app/models"
+  DETECTION_THRESHOLD: "0.75"
+  AUTO_QUARANTINE_ENABLED: "true"
+  
+  # Email processing
+  MAX_EMAIL_SIZE_MB: "50"
+  SCAN_TIMEOUT_SECONDS: "300"
+  RETENTION_DAYS: "365"
+  
+  # Security settings
+  JWT_ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  PASSWORD_MIN_LENGTH: "8"
+  
+  # Rate limiting
+  RATE_LIMIT_PER_MINUTE: "100"
+  RATE_LIMIT_BURST: "200"
+  
+  # Monitoring
+  METRICS_ENABLED: "true"
+  HEALTH_CHECK_INTERVAL: "30"
+  
+  # Celery configuration
+  CELERY_BROKER_URL: "redis://redis-service:6379/1"
+  CELERY_RESULT_BACKEND: "redis://redis-service:6379/2"
+  CELERY_WORKER_CONCURRENCY: "4"
+  
+  # Integration settings
+  GMAIL_API_ENABLED: "false"
+  MICROSOFT365_ENABLED: "false"
+  SLACK_WEBHOOK_ENABLED: "false"
+  SIEM_EXPORT_ENABLED: "false"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: phishguard-secrets
+  namespace: phishguard
+type: Opaque
+data:
+  # Base64 encoded secrets (replace with actual base64 encoded values)
+  DATABASE_PASSWORD: cGhpc2hndWFyZA==  # phishguard
+  JWT_SECRET_KEY: cGhpc2hndWFyZC1zZWNyZXQta2V5LWNoYW5nZS1pbi1wcm9kdWN0aW9u  # phishguard-secret-key-change-in-production
+  ENCRYPTION_KEY: ZW5jcnlwdGlvbi1rZXktY2hhbmdlLWluLXByb2R1Y3Rpb24=  # encryption-key-change-in-production
+  
+  # Integration API keys (add your actual keys)
+  GMAIL_CLIENT_SECRET: ""
+  MICROSOFT365_CLIENT_SECRET: ""
+  SLACK_WEBHOOK_URL: ""
+  SIEM_API_KEY: ""
+  
+  # Email configuration
+  SMTP_PASSWORD: ""
+  
+  # External service keys
+  VIRUS_TOTAL_API_KEY: ""
+  URLSCAN_API_KEY: ""

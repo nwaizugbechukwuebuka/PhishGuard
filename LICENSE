@@ -1,0 +1,239 @@
+PhishGuard Enterprise License (PEL)
+Version 1.0, October 2025
+
+Copyright (c) 2025 Chukwuebuka Tobiloba Nwaizugbe. All rights reserved.
+
+================================================================================
+                            PHISHGUARD ENTERPRISE LICENSE
+================================================================================
+
+PREAMBLE
+
+PhishGuard is an advanced, AI-powered email security platform designed to protect 
+organizations from sophisticated phishing attacks, malware, and email-based threats. 
+This license governs the use, modification, and distribution of the PhishGuard 
+software and associated documentation.
+
+The PhishGuard Enterprise License (PEL) is specifically crafted for cybersecurity 
+software to balance the benefits of open-source collaboration with the need to 
+protect intellectual property and maintain the integrity of security solutions 
+used by enterprises worldwide.
+
+DEFINITIONS
+
+"Software" refers to the PhishGuard platform, including but not limited to source 
+code, object code, documentation, configuration files, AI models, threat detection 
+algorithms, and any associated materials.
+
+"Licensor" refers to Chukwuebuka Tobiloba Nwaizugbe, the copyright holder and 
+creator of the Software.
+
+"You" or "Your" refers to any individual or entity exercising permissions under 
+this License.
+
+"Internal Use" means use of the Software within an organization for its own 
+business operations, research, development, or security purposes, without 
+redistribution or commercial exploitation of the Software itself.
+
+"Commercial Redistribution" means distributing, selling, licensing, or otherwise 
+making the Software available to third parties as part of a commercial product 
+or service offering.
+
+"Modified Work" means any work based on the Software, including but not limited 
+to derivative works, adaptations, or works containing the Software or portions 
+thereof.
+
+GRANT OF RIGHTS
+
+Subject to the terms and conditions of this License, the Licensor hereby grants 
+You the following rights:
+
+1. RESEARCH AND EDUCATIONAL USE
+   You may use, copy, modify, and study the Software for research, educational, 
+   or academic purposes, including security research and vulnerability analysis.
+
+2. INTERNAL ORGANIZATIONAL USE
+   You may use, copy, modify, and deploy the Software within Your organization 
+   for internal business purposes, including but not limited to:
+   - Email security and threat protection
+   - Cybersecurity training and awareness
+   - Security operations and incident response
+   - Integration with existing security infrastructure
+
+3. NON-COMMERCIAL MODIFICATION
+   You may modify the Software and create derivative works for research or 
+   internal use purposes, provided such modifications are not commercially 
+   redistributed.
+
+4. COLLABORATION AND CONTRIBUTION
+   You may contribute improvements, bug fixes, or enhancements back to the 
+   original project, subject to the Contributor License Agreement.
+
+RESTRICTIONS AND LIMITATIONS
+
+1. COMMERCIAL REDISTRIBUTION PROHIBITION
+   You may NOT engage in Commercial Redistribution of the Software or any 
+   Modified Work without explicit written permission from the Licensor. This 
+   includes, but is not limited to:
+   - Selling the Software or derivative works
+   - Including the Software in commercial products or services
+   - Offering the Software as a hosted service to third parties
+   - Licensing the Software to other parties for commercial purposes
+
+2. INTELLECTUAL PROPERTY PROTECTION
+   All intellectual property rights in the Software, including but not limited 
+   to copyrights, patents, trade secrets, and proprietary algorithms, remain 
+   the exclusive property of the Licensor.
+
+3. ATTRIBUTION REQUIREMENT
+   Any use or distribution of the Software must retain all copyright notices, 
+   this License, and attribution to the original author. You must prominently 
+   display the following notice:
+   
+   "This software incorporates PhishGuard technology developed by 
+   Chukwuebuka Tobiloba Nwaizugbe. Used under license."
+
+4. SECURITY INTEGRITY
+   You may not remove, disable, or circumvent any security features, encryption, 
+   or protective mechanisms in the Software without explicit permission.
+
+5. TRADEMARK RESTRICTIONS
+   You may not use the "PhishGuard" name, logo, or other trademarks associated 
+   with the Software in any manner that suggests endorsement or affiliation 
+   without written permission.
+
+COMMERCIAL LICENSING
+
+Organizations wishing to engage in Commercial Redistribution or use the Software 
+in ways not permitted under this License may obtain a separate commercial license. 
+Contact the Licensor at:
+
+Email: nwaizugbe.chukwuebuka@example.com
+Subject: PhishGuard Commercial License Inquiry
+
+Commercial licenses are available for:
+- SaaS providers and managed security service providers
+- Security vendors integrating PhishGuard technology
+- Organizations requiring commercial redistribution rights
+- Enterprise deployments requiring additional support and warranties
+
+COMPLIANCE AND SECURITY CONSIDERATIONS
+
+Given the cybersecurity nature of this Software, You acknowledge and agree that:
+
+1. The Software is designed for legitimate security purposes and must not be 
+   used for malicious activities or unauthorized access to systems.
+
+2. You are responsible for ensuring compliance with applicable laws, regulations, 
+   and industry standards when using the Software, including but not limited to 
+   data protection, privacy, and cybersecurity requirements.
+
+3. You will implement appropriate security measures to protect the Software 
+   from unauthorized access, modification, or disclosure.
+
+4. You will promptly report any security vulnerabilities discovered in the 
+   Software to the Licensor.
+
+DISCLAIMERS AND LIABILITY LIMITATIONS
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER 
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, 
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+SOFTWARE.
+
+This limitation of liability is particularly important for cybersecurity software, 
+as security threats are constantly evolving, and no security solution can provide 
+absolute protection against all possible threats.
+
+INDEMNIFICATION
+
+You agree to indemnify, defend, and hold harmless the Licensor from and against 
+any and all claims, damages, costs, and expenses (including reasonable attorneys' 
+fees) arising from Your use of the Software, violation of this License, or 
+infringement of any third-party rights.
+
+EXPORT CONTROLS AND REGULATORY COMPLIANCE
+
+The Software may be subject to export controls and regulations. You are 
+responsible for complying with all applicable export laws and regulations when 
+using or distributing the Software.
+
+TERMINATION
+
+This License is effective until terminated. Your rights under this License will 
+terminate automatically without notice if You fail to comply with any of its 
+terms. Upon termination, You must cease all use of the Software and destroy all 
+copies in Your possession or control.
+
+The Licensor reserves the right to terminate this License immediately if the 
+Software is used for malicious purposes or in violation of applicable laws.
+
+GOVERNING LAW AND JURISDICTION
+
+This License shall be governed by and construed in accordance with the laws of 
+[Your Jurisdiction], without regard to its conflict of law provisions. Any 
+disputes arising under this License shall be resolved through binding arbitration 
+or in the courts of [Your Jurisdiction].
+
+ENTIRE AGREEMENT AND MODIFICATIONS
+
+This License constitutes the entire agreement between You and the Licensor 
+regarding the Software and supersedes all prior communications, understandings, 
+or agreements. This License may only be modified by a written agreement signed 
+by the Licensor.
+
+SEVERABILITY
+
+If any provision of this License is held to be unenforceable, such provision 
+shall be reformed only to the extent necessary to make it enforceable, and the 
+remainder of the License shall remain in full force and effect.
+
+CONTACT INFORMATION
+
+For questions about this License, commercial licensing opportunities, or other 
+inquiries, please contact:
+
+Chukwuebuka Tobiloba Nwaizugbe
+Creator and Copyright Holder, PhishGuard Enterprise Security Platform
+Email: nwaizugbe.chukwuebuka@example.com
+LinkedIn: https://linkedin.com/in/chukwuebuka-nwaizugbe
+
+================================================================================
+
+CONTRIBUTOR LICENSE AGREEMENT
+
+By contributing code, documentation, or other materials to the PhishGuard 
+project, You agree that:
+
+1. Your contributions are original work or You have the right to submit them
+2. You grant the Licensor a perpetual, worldwide, non-exclusive, royalty-free 
+   license to use, modify, and distribute Your contributions
+3. Your contributions do not infringe upon the rights of any third party
+4. You understand that contributions may be incorporated into commercial versions
+
+================================================================================
+
+SECURITY VULNERABILITY DISCLOSURE
+
+If You discover a security vulnerability in the Software, please report it 
+responsibly by emailing security@phishguard.com with:
+
+- Detailed description of the vulnerability
+- Steps to reproduce the issue
+- Potential impact assessment
+- Suggested remediation (if available)
+
+We are committed to addressing security issues promptly and will acknowledge 
+receipt within 24 hours.
+
+================================================================================
+
+                           END OF LICENSE TERMS
+
+Copyright (c) 2025 Chukwuebuka Tobiloba Nwaizugbe
+PhishGuard Enterprise Security Platform
+All Rights Reserved.

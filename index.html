@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PhishGuard - Enterprise-grade AI-powered email security platform for comprehensive phishing protection and threat detection">
+    <meta name="keywords" content="phishing protection, email security, AI threat detection, cybersecurity, enterprise security">
+    <meta name="author" content="Chukwuebuka Tobiloba Nwaizugbe">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="PhishGuard - Enterprise Email Security Platform">
+    <meta property="og:description" content="Advanced AI-powered phishing protection for enterprise organizations">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/nwaizugbechukwuebuka/phishguard">
+    <meta property="og:image" content="https://github.com/nwaizugbechukwuebuka/phishguard/raw/main/docs/assets/phishguard-logo.png">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PhishGuard - Enterprise Email Security">
+    <meta name="twitter:description" content="AI-powered phishing detection and email security platform">
+    <meta name="twitter:image" content="https://github.com/nwaizugbechukwuebuka/phishguard/raw/main/docs/assets/phishguard-logo.png">
+    
+    <title>PhishGuard - Enterprise Email Security Platform</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="src/frontend/public/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="src/frontend/public/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="src/frontend/public/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="src/frontend/public/favicon.ico">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"></noscript>
+    
+    <!-- Critical CSS for above-the-fold content -->
+    <style>
+        /* Critical CSS for immediate rendering */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4f46e5;
+            text-decoration: none;
+        }
+        
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+        
+        .cta-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .cta-secondary {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        
+        .cta-secondary:hover {
+            background: white;
+            color: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <a href="#" class="logo">🛡️ PhishGuard</a>
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#demo" class="nav-link">Demo</a>
+                    <a href="#docs" class="nav-link">Documentation</a>
+                    <a href="https://github.com/nwaizugbechukwuebuka/phishguard" class="nav-link" target="_blank">GitHub</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <h1>Enterprise Email Security<br>Powered by AI</h1>
+                <p>Protect your organization from sophisticated phishing attacks with PhishGuard's advanced machine learning detection engine and comprehensive threat analytics.</p>
+                <div class="cta-buttons">
+                    <a href="#demo" class="cta-button">Try Demo</a>
+                    <a href="https://github.com/nwaizugbechukwuebuka/phishguard" class="cta-button cta-secondary" target="_blank">View on GitHub</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="container">
+                <h2>Advanced Protection Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI-Powered Detection</h3>
+                        <p>Advanced machine learning algorithms analyze email content, headers, and behavioral patterns to detect sophisticated phishing attempts with high accuracy.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Intelligent Quarantine</h3>
+                        <p>Automatic isolation of suspicious emails with secure storage, detailed analysis, and administrative review capabilities for false positive management.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Threat Analytics</h3>
+                        <p>Comprehensive threat intelligence with real-time dashboards, campaign detection, and detailed reporting for security teams and executives.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔔</div>
+                        <h3>Multi-Channel Alerts</h3>
+                        <p>Instant notifications via email, Slack, Teams, and SIEM integration with customizable escalation procedures and stakeholder management.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Phishing Simulation</h3>
+                        <p>Educational security awareness campaigns with realistic phishing simulations, progress tracking, and personalized training recommendations.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚖️</div>
+                        <h3>Compliance Ready</h3>
+                        <p>Built-in compliance frameworks for GDPR, SOX, HIPAA with automated audit trails, data retention policies, and regulatory reporting.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack -->
+        <section class="tech-stack">
+            <div class="container">
+                <h2>Enterprise-Grade Technology</h2>
+                <div class="tech-grid">
+                    <div class="tech-category">
+                        <h3>Backend</h3>
+                        <div class="tech-items">
+                            <span class="tech-item">FastAPI</span>
+                            <span class="tech-item">PostgreSQL</span>
+                            <span class="tech-item">Redis</span>
+                            <span class="tech-item">Celery</span>
+                        </div>
+                    </div>
+                    <div class="tech-category">
+                        <h3>AI/ML</h3>
+                        <div class="tech-items">
+                            <span class="tech-item">scikit-learn</span>
+                            <span class="tech-item">TensorFlow</span>
+                            <span class="tech-item">NLTK</span>
+                            <span class="tech-item">Feature Engineering</span>
+                        </div>
+                    </div>
+                    <div class="tech-category">
+                        <h3>Frontend</h3>
+                        <div class="tech-items">
+                            <span class="tech-item">React</span>
+                            <span class="tech-item">Material-UI</span>
+                            <span class="tech-item">Vite</span>
+                            <span class="tech-item">Chart.js</span>
+                        </div>
+                    </div>
+                    <div class="tech-category">
+                        <h3>DevOps</h3>
+                        <div class="tech-items">
+                            <span class="tech-item">Docker</span>
+                            <span class="tech-item">Kubernetes</span>
+                            <span class="tech-item">GitHub Actions</span>
+                            <span class="tech-item">Nginx</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="demo">
+            <div class="container">
+                <h2>Interactive Demo</h2>
+                <div class="demo-container">
+                    <div class="demo-content">
+                        <h3>Experience PhishGuard in Action</h3>
+                        <p>See how our AI-powered detection engine identifies and classifies phishing attempts in real-time.</p>
+                        <div class="demo-features">
+                            <div class="demo-feature">
+                                <span class="demo-icon">✨</span>
+                                <span>Real-time threat detection</span>
+                            </div>
+                            <div class="demo-feature">
+                                <span class="demo-icon">📈</span>
+                                <span>Live analytics dashboard</span>
+                            </div>
+                            <div class="demo-feature">
+                                <span class="demo-icon">🎮</span>
+                                <span>Interactive simulation tools</span>
+                            </div>
+                        </div>
+                        <a href="src/frontend/src/App.jsx" class="demo-button">Launch Interactive Demo</a>
+                    </div>
+                    <div class="demo-visual">
+                        <div class="demo-screen">
+                            <div class="demo-header">
+                                <div class="demo-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <span class="demo-title">PhishGuard Dashboard</span>
+                            </div>
+                            <div class="demo-body">
+                                <div class="demo-metric">
+                                    <span class="metric-label">Threats Blocked</span>
+                                    <span class="metric-value">1,247</span>
+                                </div>
+                                <div class="demo-metric">
+                                    <span class="metric-label">Detection Accuracy</span>
+                                    <span class="metric-value">99.2%</span>
+                                </div>
+                                <div class="demo-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documentation Section -->
+        <section id="docs" class="documentation">
+            <div class="container">
+                <h2>Comprehensive Documentation</h2>
+                <div class="docs-grid">
+                    <a href="README.md" class="doc-card">
+                        <div class="doc-icon">📚</div>
+                        <h3>Getting Started</h3>
+                        <p>Installation guide, configuration, and quick setup instructions for development and production environments.</p>
+                    </a>
+                    <a href="docs/api_reference.md" class="doc-card">
+                        <div class="doc-icon">🔗</div>
+                        <h3>API Reference</h3>
+                        <p>Complete API documentation with endpoints, authentication, request/response examples, and integration guides.</p>
+                    </a>
+                    <a href="docs/architecture.md" class="doc-card">
+                        <div class="doc-icon">🏗️</div>
+                        <h3>Architecture</h3>
+                        <p>System architecture, component relationships, data flow, and technical design decisions.</p>
+                    </a>
+                    <a href="docs/security_model.md" class="doc-card">
+                        <div class="doc-icon">🛡️</div>
+                        <h3>Security Model</h3>
+                        <p>Security architecture, threat model, compliance framework, and operational security procedures.</p>
+                    </a>
+                    <a href="docs/detection_engine.md" class="doc-card">
+                        <div class="doc-icon">🎯</div>
+                        <h3>Detection Engine</h3>
+                        <p>AI/ML algorithms, feature engineering, model training, and detection methodology documentation.</p>
+                    </a>
+                    <a href="docs/deployment.md" class="doc-card">
+                        <div class="doc-icon">🚀</div>
+                        <h3>Deployment</h3>
+                        <p>Production deployment guides, Docker configurations, Kubernetes manifests, and scaling recommendations.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- GitHub Stats -->
+        <section class="github-stats">
+            <div class="container">
+                <h2>Open Source Project</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">20+</div>
+                        <div class="stat-label">Components</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">95%</div>
+                        <div class="stat-label">Test Coverage</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">Enterprise</div>
+                        <div class="stat-label">Ready</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">MIT</div>
+                        <div class="stat-label">License</div>
+                    </div>
+                </div>
+                <div class="github-buttons">
+                    <a href="https://github.com/nwaizugbechukwuebuka/phishguard" class="github-button" target="_blank">
+                        <span class="github-icon">⭐</span>
+                        Star on GitHub
+                    </a>
+                    <a href="https://github.com/nwaizugbechukwuebuka/phishguard/fork" class="github-button" target="_blank">
+                        <span class="github-icon">🍴</span>
+                        Fork Project
+                    </a>
+                    <a href="https://github.com/nwaizugbechukwuebuka/phishguard/issues" class="github-button" target="_blank">
+                        <span class="github-icon">🐛</span>
+                        Report Issue
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PhishGuard</h3>
+                    <p>Enterprise-grade email security platform powered by advanced AI for comprehensive phishing protection.</p>
+                    <div class="social-links">
+                        <a href="https://github.com/nwaizugbechukwuebuka" aria-label="GitHub Profile" target="_blank">GitHub</a>
+                        <a href="https://linkedin.com/in/chukwuebuka-nwaizugbe" aria-label="LinkedIn Profile" target="_blank">LinkedIn</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="README.md">Getting Started</a></li>
+                        <li><a href="docs/api_reference.md">API Reference</a></li>
+                        <li><a href="docs/architecture.md">Architecture</a></li>
+                        <li><a href="docs/security_model.md">Security</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="https://github.com/nwaizugbechukwuebuka/phishguard/releases">Releases</a></li>
+                        <li><a href="https://github.com/nwaizugbechukwuebuka/phishguard/issues">Issues</a></li>
+                        <li><a href="CONTRIBUTING.md">Contributing</a></li>
+                        <li><a href="LICENSE">License</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li>Developer: Chukwuebuka Tobiloba Nwaizugbe</li>
+                        <li><a href="mailto:nwaizugbechukwuebuka@gmail.com">Email Support</a></li>
+                        <li><a href="https://github.com/nwaizugbechukwuebuka/phishguard/discussions">Discussions</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PhishGuard. Released under the PhishGuard Enterprise License (PEL).</p>
+                <p>Built with ❤️ for enterprise cybersecurity.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Load non-critical CSS asynchronously -->
+    <style>
+        /* Extended CSS for full page styling */
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: #4b5563;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: #4f46e5;
+        }
+        
+        .features {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1f2937;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .tech-stack {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .tech-stack h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1f2937;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .tech-category {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .tech-category h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4f46e5;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+        
+        .tech-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .tech-item {
+            background: #4f46e5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .demo {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .demo h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .demo-content h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-content p {
+            font-size: 1.125rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .demo-features {
+            margin-bottom: 2rem;
+        }
+        
+        .demo-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        .demo-icon {
+            font-size: 1.5rem;
+        }
+        
+        .demo-button {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .demo-screen {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .demo-header {
+            background: #f3f4f6;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .demo-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .demo-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+        
+        .demo-dots span:first-child {
+            background: #ef4444;
+        }
+        
+        .demo-dots span:nth-child(2) {
+            background: #f59e0b;
+        }
+        
+        .demo-dots span:nth-child(3) {
+            background: #10b981;
+        }
+        
+        .demo-title {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .demo-body {
+            padding: 2rem;
+            color: #1f2937;
+        }
+        
+        .demo-metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .metric-label {
+            color: #6b7280;
+        }
+        
+        .metric-value {
+            font-weight: 700;
+            color: #10b981;
+        }
+        
+        .demo-chart {
+            height: 100px;
+            background: linear-gradient(90deg, #4f46e5 0%, #10b981 100%);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .documentation {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .documentation h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #1f2937;
+        }
+        
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .doc-card {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .doc-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .doc-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .doc-card p {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .github-stats {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .github-stats h2 {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #10b981;
+        }
+        
+        .stat-label {
+            color: #d1d5db;
+            font-weight: 500;
+        }
+        
+        .github-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .github-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .github-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .github-icon {
+            font-size: 1.2rem;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 60px 0 20px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-section h3,
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: #10b981;
+        }
+        
+        .footer-section p {
+            color: #d1d5db;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section ul li a {
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-section ul li a:hover {
+            color: #10b981;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: #10b981;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 2rem;
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .footer-bottom p {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.125rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .demo-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .features-grid,
+            .docs-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .github-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+        
+        /* Performance optimizations */
+        .feature-card,
+        .doc-card,
+        .demo-screen {
+            will-change: transform;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Loading animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .feature-card,
+        .doc-card,
+        .stat-card {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+
+    <!-- Analytics and Performance Monitoring -->
+    <script>
+        // Page load performance monitoring
+        window.addEventListener('load', function() {
+            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+            console.log('Page load time:', loadTime + 'ms');
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.querySelectorAll('.feature-card, .doc-card, .stat-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

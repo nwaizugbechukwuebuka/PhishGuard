@@ -1,0 +1,212 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: phishguard-postgres
+    environment:
+      POSTGRES_DB: phishguard_db
+      POSTGRES_USER: phishguard
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deployment/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - phishguard-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phishguard -d phishguard_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis Cache and Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: phishguard-redis
+    command: redis-server --appendonly yes --requirepass redispassword
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - phishguard-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # FastAPI Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    container_name: phishguard-backend
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://phishguard:password@postgres:5432/phishguard_db
+      - REDIS_URL=redis://:redispassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:redispassword@redis:6379/2
+    volumes:
+      - ./src:/app/src
+      - ./src/quarantine_storage:/app/quarantine_storage
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - phishguard-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Celery Worker for Background Tasks
+  celery-worker:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    container_name: phishguard-celery-worker
+    command: celery -A src.tasks.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://phishguard:password@postgres:5432/phishguard_db
+      - REDIS_URL=redis://:redispassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:redispassword@redis:6379/2
+    volumes:
+      - ./src:/app/src
+      - ./src/quarantine_storage:/app/quarantine_storage
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    networks:
+      - phishguard-network
+    restart: unless-stopped
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile
+    container_name: phishguard-celery-beat
+    command: celery -A src.tasks.celery_app beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://phishguard:password@postgres:5432/phishguard_db
+      - REDIS_URL=redis://:redispassword@redis:6379/0
+      - CELERY_BROKER_URL=redis://:redispassword@redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://:redispassword@redis:6379/2
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - postgres
+      - redis
+      - backend
+    networks:
+      - phishguard-network
+    restart: unless-stopped
+
+  # React Frontend Application
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: ../../deployment/frontend.Dockerfile
+    container_name: phishguard-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v1
+      - REACT_APP_WS_URL=ws://localhost:8000/ws
+    depends_on:
+      - backend
+    networks:
+      - phishguard-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: phishguard-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deployment/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - phishguard-network
+    restart: unless-stopped
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: phishguard-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployment/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - phishguard-network
+    restart: unless-stopped
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: phishguard-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deployment/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - phishguard-network
+    restart: unless-stopped
+
+  # Mailhog for Email Testing (Development)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: phishguard-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - phishguard-network
+    profiles:
+      - dev
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  phishguard-network:
+    driver: bridge

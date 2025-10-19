@@ -1,0 +1,666 @@
+# PhishGuard .gitignore - Comprehensive security-focused configuration
+
+# ================================
+# ENVIRONMENT & CONFIGURATION
+# ================================
+
+# Environment variables and sensitive configuration
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*
+!.env.example
+
+# Configuration files with secrets
+config/secrets.json
+config/production.json
+config/local.json
+**/config/**/secrets.*
+**/config/**/local.*
+
+# Database configuration with credentials
+database.ini
+db_config.py
+database_credentials.*
+
+# API keys and tokens
+api_keys.txt
+tokens.json
+credentials.json
+service_account.json
+*.pem
+*.p12
+*.pfx
+
+# ================================
+# PYTHON SPECIFIC
+# ================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff
+instance/
+.webassets-cache
+
+# Scrapy stuff
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# ================================
+# NODE.JS / REACT SPECIFIC
+# ================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# TypeScript v1 declaration files
+typings/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# ================================
+# DATABASE & DATA FILES
+# ================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Database dumps and backups
+*.sql
+*.dump
+*.backup
+*.bak
+backup/
+backups/
+dumps/
+
+# Data directories
+data/
+datasets/
+training_data/
+test_data/
+
+# AI/ML model files (often large)
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.model
+models/
+checkpoints/
+saved_models/
+
+# ================================
+# SECURITY & QUARANTINE
+# ================================
+
+# Quarantine storage - CRITICAL SECURITY
+quarantined_emails/
+quarantine_storage/
+infected_files/
+malware_samples/
+suspicious_attachments/
+
+# Security logs and audit trails
+security_logs/
+audit_trail/
+incident_reports/
+forensic_data/
+
+# Encryption keys and certificates
+*.key
+*.crt
+*.cert
+*.csr
+*.keystore
+keys/
+certs/
+certificates/
+ssl/
+tls/
+
+# Password files
+passwords.txt
+shadow
+passwd
+htpasswd
+.htpasswd
+
+# SSH keys
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.ssh/
+.ssh/
+
+# GPG keys
+*.gpg
+*.asc
+.gnupg/
+
+# ================================
+# DOCKER & CONTAINERIZATION
+# ================================
+
+# Docker
+Dockerfile.local
+docker-compose.override.yml
+docker-compose.local.yml
+.dockerignore.local
+
+# Container data
+docker_data/
+container_volumes/
+
+# ================================
+# KUBERNETES & DEPLOYMENT
+# ================================
+
+# Kubernetes secrets
+**/k8s/**/secrets/
+**/kubernetes/**/secrets/
+kube-config
+kubeconfig
+*.kubeconfig
+
+# Helm
+charts/*/charts/
+charts/*/*.tgz
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+
+# ================================
+# MONITORING & LOGGING
+# ================================
+
+# Log files
+*.log
+logs/
+log/
+*.out
+*.err
+
+# Monitoring data
+prometheus_data/
+grafana_data/
+metrics/
+alerts/
+
+# Application logs
+app.log
+error.log
+access.log
+debug.log
+audit.log
+
+# ================================
+# DEVELOPMENT TOOLS
+# ================================
+
+# IDE files
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/.ropeproject
+.idea/
+*.swp
+*.swo
+*~
+
+# Editor directories and files
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ================================
+# TESTING & QUALITY ASSURANCE
+# ================================
+
+# Test artifacts
+test_results/
+test_reports/
+coverage_reports/
+.coverage
+htmlcov/
+
+# Performance testing
+performance_results/
+load_test_results/
+benchmark_results/
+
+# Security testing
+security_scan_results/
+vulnerability_reports/
+penetration_test_results/
+
+# ================================
+# DOCUMENTATION
+# ================================
+
+# Generated documentation
+docs/_build/
+docs/build/
+site/
+
+# Documentation that shouldn't be tracked
+internal_docs/
+confidential_docs/
+architecture_internal/
+
+# ================================
+# THIRD-PARTY INTEGRATIONS
+# ================================
+
+# Vendor files
+vendor/
+third_party/
+
+# Integration credentials
+integration_configs/
+webhook_secrets/
+api_credentials/
+
+# External service configurations
+siem_config/
+soar_config/
+email_provider_config/
+
+# ================================
+# BUSINESS & COMPLIANCE
+# ================================
+
+# Compliance documents (often confidential)
+compliance_reports/
+audit_documents/
+security_assessments/
+risk_assessments/
+
+# Business documents
+business_plans/
+financial_data/
+customer_data/
+user_data/
+
+# Legal documents
+legal/
+contracts/
+agreements/
+
+# ================================
+# BACKUP & RECOVERY
+# ================================
+
+# Backup files
+*.backup
+*.bak
+backup_*
+*_backup
+*.old
+
+# Recovery files
+recovery/
+restore/
+snapshots/
+
+# ================================
+# TEMPORARY & CACHE FILES
+# ================================
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+cache/
+.cache/
+
+# System temporary files
+.DS_Store
+.tmp*
+~$*
+
+# Application cache
+.webpack-cache/
+.babel-cache/
+.eslint-cache/
+
+# ================================
+# SPECIFIC TO PHISHGUARD
+# ================================
+
+# PhishGuard specific data
+threat_intelligence/
+malware_signatures/
+phishing_templates/
+training_campaigns/
+simulation_data/
+
+# AI/ML specific
+feature_vectors/
+training_logs/
+model_metrics/
+experiment_results/
+
+# Email processing
+email_queue/
+processed_emails/
+failed_emails/
+email_cache/
+
+# Integration specific
+gmail_tokens/
+office365_tokens/
+slack_webhooks/
+teams_webhooks/
+
+# Analysis results
+threat_analysis/
+forensic_analysis/
+detection_results/
+false_positives/
+
+# User data (GDPR compliance)
+user_uploads/
+user_reports/
+personal_data/
+exported_data/
+
+# ================================
+# WILDCARD EXCLUSIONS
+# ================================
+
+# Any file with "secret" in the name
+*secret*
+*SECRET*
+
+# Any file with "password" in the name  
+*password*
+*PASSWORD*
+
+# Any file with "private" in the name
+*private*
+*PRIVATE*
+
+# Any file with "confidential" in the name
+*confidential*
+*CONFIDENTIAL*
+
+# Any credential files
+*credential*
+*CREDENTIAL*
+
+# Any token files
+*token*
+*TOKEN*
+
+# Hidden files that might contain sensitive data
+.*secret*
+.*private*
+.*credential*
+
+# ================================
+# EXCEPTIONS (files to track)
+# ================================
+
+# Track example/template files
+!.env.example
+!config.example.json
+!secrets.example.json
+!credentials.example.json
+
+# Track documentation templates
+!docs/templates/
+!examples/
+
+# Track Docker templates
+!docker-compose.example.yml
+!Dockerfile.example
+
+# Track configuration templates
+!**/config.template.*
+!**/example.*
+
+# Track test fixtures (non-sensitive)
+!tests/fixtures/
+!tests/samples/safe_*
+
+# ================================
+# PERFORMANCE OPTIMIZATION
+# ================================
+
+# Large files that slow down git
+*.iso
+*.img
+*.dmg
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Video files
+*.mp4
+*.avi
+*.mkv
+*.mov
+
+# Audio files
+*.mp3
+*.wav
+*.flac
